@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -32,6 +33,14 @@ public final class ButterBlock extends JavaPlugin {
 		getCommand("unseparate").setExecutor(new UnseperateCommandExecutor(separated, getLogger()));
 		Communications.info(getLogger(), Communications.ENABLED);
 		
+		boolean executeCommand = getConfig().getBoolean("executeCommand");
+		if(executeCommand) {
+			Communications.info(getLogger(), Communications.USING_COMMAND);
+			playerMessageListener.addOnRegexMatched(new ExecuteCommandOnRegexMatched(getConfig()));
+		}else {
+			Communications.info(getLogger(), Communications.SEPERATE_BELIEVERS);
+			playerMessageListener.addOnRegexMatched(new SeperateOnRegexMatched());
+		}
 		saveConfig();
 	}
 
@@ -58,6 +67,16 @@ public final class ButterBlock extends JavaPlugin {
 			playerMessageListener.setRemember(rem);
 		}
 
+		boolean executeCommand = getConfig().getBoolean("executeCommand");
+		playerMessageListener.clearOnRegexMatchedListeners();
+		if(executeCommand) {
+			Communications.info(getLogger(), Communications.USING_COMMAND);
+			playerMessageListener.addOnRegexMatched(new ExecuteCommandOnRegexMatched(getConfig()));
+		}else {
+			Communications.info(getLogger(), Communications.SEPERATE_BELIEVERS);
+			playerMessageListener.addOnRegexMatched(new SeperateOnRegexMatched());
+		}
+		
 		reloadMyMemory();
 	}
 

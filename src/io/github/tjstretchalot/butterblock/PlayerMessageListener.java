@@ -1,5 +1,6 @@
 package io.github.tjstretchalot.butterblock;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -23,6 +24,8 @@ public class PlayerMessageListener implements Listener {
 	private YamlConfiguration memory;
 	private List<String> seperated; 
 	private Logger logger;
+	
+	private List<OnRegexMatched> onRegexMatched;
 
 	public PlayerMessageListener(JavaPlugin plugin, YamlConfiguration memory, String[] regexes, 
 			boolean remember, List<String> seperated2) {
@@ -31,8 +34,7 @@ public class PlayerMessageListener implements Listener {
 		this.remember = remember;
 		this.memory = memory;
 		this.logger = plugin.getLogger(); 
-		
-		logger.info("regexes[0]: " + this.regexes[0]);
+		onRegexMatched = new ArrayList<>();
 	}
 	
 	@EventHandler(ignoreCancelled = true) 
@@ -75,15 +77,9 @@ public class PlayerMessageListener implements Listener {
 		
 		String msg = event.getMessage();
 		if(shouldSeperate(msg)) {
-			synchronized(seperated) {
-				Communications.info(logger, Communications.ON_SEPERATE_PLAYER, player, msg);
-				seperated.add(event.getPlayer().getName());
-				
-				if(remember) {
-					memory.set("memory.seperated", seperated);
-				}
+			for(OnRegexMatched matched : onRegexMatched) {
+				matched.onRegexMatched(this, seperated, memory, logger, event);
 			}
-			sendToSeperated(event);
 		}else {
 			sendToRegular(event);
 		}
@@ -104,7 +100,7 @@ public class PlayerMessageListener implements Listener {
 		return false;
 	}
 
-	private void sendToRegular(AsyncPlayerChatEvent event) {
+	void sendToRegular(AsyncPlayerChatEvent event) {
 		Communications.info(logger, Communications.REGULAR_CHAT, event);
 		synchronized(seperated) {
 			for(Player player : Bukkit.getOnlinePlayers()) {
@@ -115,7 +111,7 @@ public class PlayerMessageListener implements Listener {
 		}
 	}
 
-	private void sendToSeperated(AsyncPlayerChatEvent event) {
+	void sendToSeperated(AsyncPlayerChatEvent event) {
 		Communications.info(logger, Communications.SEPERATED_CHAT, event);
 		synchronized(seperated) {
 			for(Player player : Bukkit.getOnlinePlayers()) {
@@ -135,5 +131,17 @@ public class PlayerMessageListener implements Listener {
 	
 	public void setRemember(boolean remember) {
 		this.remember = remember;
+	}
+
+	public void addOnRegexMatched(OnRegexMatched onRegexMatched) {
+		this.onRegexMatched.add(onRegexMatched); // could be named better
+	}
+
+	public boolean remember() {
+		return remember;
+	}
+
+	public void clearOnRegexMatchedListeners() {
+		onRegexMatched.clear();
 	}
 }
