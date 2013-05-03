@@ -1,0 +1,9 @@
+name: ButterBlock
+main: io.github.tjstretchalot.butterblock.ButterBlock
+version: 0.1
+commands:
+  unseparate:
+    description: Unseparate someone from normal chat 
+    usage: /<command> [player]
+    permission: butterblock.unseparate
+    permission-message: You can't do that.

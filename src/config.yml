@@ -1,0 +1,5 @@
+remember: No
+regexes:
+- bu+?[td]+?e+?r
+executeCommand: No
+command: 

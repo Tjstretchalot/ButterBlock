@@ -27,12 +27,12 @@ public final class ButterBlock extends JavaPlugin {
 
 		List<String> regexes = getConfig().getStringList("regexes");
 		boolean rem = getConfig().getBoolean("remember");
-		
+
 		playerMessageListener = new PlayerMessageListener(this, memory, regexes.toArray(new String[0]), rem, separated);
 		getServer().getPluginManager().registerEvents(playerMessageListener, this);
 		getCommand("unseparate").setExecutor(new UnseperateCommandExecutor(separated, getLogger()));
 		Communications.info(getLogger(), Communications.ENABLED);
-		
+
 		boolean executeCommand = getConfig().getBoolean("executeCommand");
 		if(executeCommand) {
 			Communications.info(getLogger(), Communications.USING_COMMAND);
@@ -68,15 +68,17 @@ public final class ButterBlock extends JavaPlugin {
 		}
 
 		boolean executeCommand = getConfig().getBoolean("executeCommand");
-		playerMessageListener.clearOnRegexMatchedListeners();
-		if(executeCommand) {
-			Communications.info(getLogger(), Communications.USING_COMMAND);
-			playerMessageListener.addOnRegexMatched(new ExecuteCommandOnRegexMatched(getConfig()));
-		}else {
-			Communications.info(getLogger(), Communications.SEPERATE_BELIEVERS);
-			playerMessageListener.addOnRegexMatched(new SeperateOnRegexMatched());
+		if(playerMessageListener != null) {
+			playerMessageListener.clearOnRegexMatchedListeners();
+			if(executeCommand) {
+				Communications.info(getLogger(), Communications.USING_COMMAND);
+				playerMessageListener.addOnRegexMatched(new ExecuteCommandOnRegexMatched(getConfig()));
+			}else {
+				Communications.info(getLogger(), Communications.SEPERATE_BELIEVERS);
+				playerMessageListener.addOnRegexMatched(new SeperateOnRegexMatched());
+			}
 		}
-		
+
 		reloadMyMemory();
 	}
 
@@ -100,7 +102,7 @@ public final class ButterBlock extends JavaPlugin {
 			separated.addAll(memory.getStringList("memory.seperated"));
 		}
 	}
-	
+
 	@Override
 	public void saveConfig() {
 		super.saveConfig();
