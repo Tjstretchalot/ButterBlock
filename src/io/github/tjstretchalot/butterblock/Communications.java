@@ -86,6 +86,24 @@ public class Communications {
 	private static void verify(Object[] got, Class<? extends Object>... expected) {
 		for(int i = 0; i < got.length; i++) {
 			if(!got[i].getClass().equals(expected[i])) {
+				Class superCl = got[i].getClass();
+				while(superCl != Object.class) {
+					superCl = superCl.getSuperclass();
+					if(superCl == expected[i])
+						break;
+				}
+				if(superCl == expected[i])
+					continue;
+				Class<?>[] inFaces = got[i].getClass().getInterfaces();
+				boolean b = false;
+				for(Class cl : inFaces) {
+					if(cl == expected[i]) {
+						b = true;
+						break;
+					}
+				}
+				if(b)
+					continue;
 				throw new RuntimeException("Expected argument " + i + " to be a " +
 						expected[i].getSimpleName() + " but got a " +
 						got[i].getClass().getSimpleName());
